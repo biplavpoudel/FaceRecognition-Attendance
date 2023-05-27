@@ -74,7 +74,7 @@ while True:
             y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4      # we reduced the size of image by one-fourth for live-encoding so...
             bbox = 55+x1, 162+y1, x2-x1, y2-y1          # bbox = x1+offset, y1+offset, width, height
             # (55+ x1, 162+y1) = (initial position of actual image in background image in x-axis+ offset position of face in actual image in x-axis, ...)
-            # our actual image doesn't start in (0,0) position of imgBackground. Instead it is (55, 162)
+            # our actual image doesn't start in (0,0) position of imgBackground. Instead, it is (55, 162)
             imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)  # rt= rectangle thickness, bbox= bounding box
 
 
