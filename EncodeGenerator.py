@@ -3,6 +3,21 @@ import os
 import face_recognition
 import pickle
 
+
+# Imported from Project Settings> Services Accout> Python
+# for uploading image to the database while encoding
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import storage
+from firebase_admin import db
+
+cred = credentials.Certificate("serviceAccountKey.json")
+# Realtime Database URL is placed in JSON format
+firebase_admin.initialize_app(cred, {
+    'databaseURL' : "https://faceattendancerealtime-179d4-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    'storageBucket' : "faceattendancerealtime-179d4.appspot.com"
+})
+
 # Importing student images
 folderPath = 'Images'
 PathList = os.listdir(folderPath)

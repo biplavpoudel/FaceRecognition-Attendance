@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 import os
 import cvzone
-
 import face_recognition
 
 cap = cv2.VideoCapture(0)
