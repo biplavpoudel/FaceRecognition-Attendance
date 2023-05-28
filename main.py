@@ -29,7 +29,7 @@ file = open("EncodeFile.p", 'rb')
 encodeKnownListWithIds = pickle.load(file)
 file.close()
 
-encodeKnownList, studentIds = encodeKnownListWithIds
+encodeKnownList, employeeIds = encodeKnownListWithIds
 # print(studentIds)
 print("Encoded files loaded successfully.")
 
@@ -68,7 +68,7 @@ while True:
 
         if matches[matchIndex]:     # if true:
             print("Known Face Detected")
-            print("Student Id: ", studentIds[matchIndex])
+            print("Employees Id: ", employeeIds[matchIndex])
             # we now draw rectangle around the detected face to be fancy 😂😂
             y1, x2, y2, x1 = faceLocations       # this is how face location is mapped. weirdly..
             y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4      # we reduced the size of image by one-fourth for live-encoding so...

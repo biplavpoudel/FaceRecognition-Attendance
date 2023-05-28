@@ -7,7 +7,7 @@ import pickle
 folderPath = 'Images'
 PathList = os.listdir(folderPath)
 imgList = []
-studentIds = []
+employeeIds = []
 for path in PathList:
     imgList.append(cv2.imread(os.path.join(folderPath, path)))
     # os.path.join creates the directory for each images as "Images/abc.png"
@@ -15,7 +15,7 @@ for path in PathList:
     # print(path) gives ".png" extension with the imageid i.e."imageid.png"
     # Split the pathname path into a pair(root, ext) such that root + ext == path
     # print(os.path.splitext(path)[0])
-    studentIds.append(os.path.splitext(path)[0])
+    employeeIds.append(os.path.splitext(path)[0])
 
 # print(len(imgList))
 # print(imgList)
@@ -34,7 +34,7 @@ def findEncodings(imagesList):
 # If lots of images, it may take a while, so we print Encoding started/completed messages
 print("Encoding has been initiated...")
 encodeKnownList = findEncodings(imgList)
-encodeKnownListWithIds = [encodeKnownList, studentIds]
+encodeKnownListWithIds = [encodeKnownList, employeeIds]
 print("Encoding Complete")
 
 # pickle file to dump/store the two lists for webcam to compare later on into a file called "file"
