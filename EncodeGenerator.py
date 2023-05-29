@@ -32,6 +32,16 @@ for path in PathList:
     # print(os.path.splitext(path)[0])
     employeeIds.append(os.path.splitext(path)[0])
 
+    # Below code is for finding the filepath for upload to firebase
+    fileName = f'{folderPath}/{path}'
+    # Initializes a bucket object using the default project ID and credentials from the environment
+    bucket = storage.bucket()
+    # We create a blob object representing a specific file within the bucket and the 'fileName' variable contains the path to the file we want to upload
+    blob = bucket.blob(fileName)
+    # Triggers the upload process, copying the contents of the local file specified by fileName to the blob in the bucket
+    blob.upload_from_filename(fileName)
+    print("Image:",path ,"uploaded to the Firebase Storage Server")
+
 # print(len(imgList))
 # print(imgList)
 # print(studentIds)

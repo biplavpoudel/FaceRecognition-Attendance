@@ -5,6 +5,19 @@ import os
 import cvzone
 import face_recognition
 
+# for real-time database update
+import firebase_admin
+from firebase_admin import credentials
+# from firebase_admin import storage
+from firebase_admin import db
+
+cred = credentials.Certificate("serviceAccountKey.json")
+# Realtime Database URL is placed in JSON format
+firebase_admin.initialize_app(cred, {
+    'databaseURL' : "https://faceattendancerealtime-179d4-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    # 'storageBucket' : "faceattendancerealtime-179d4.appspot.com"
+})
+
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
@@ -32,6 +45,11 @@ encodeKnownList, employeeIds = encodeKnownListWithIds
 # print(studentIds)
 print("Encoded files loaded successfully.")
 
+modeType = 0  # mode: active, info, marked, already marked
+counter = 0  # to count no of matched image frames
+id = -1  # for storing matched employee id
+
+
 while True:
     success, img = cap.read()
 
@@ -47,7 +65,7 @@ while True:
 
 
     imgBackground[162:162+480, 55:55+640] = img    # [height, width] or [y-axes, x-axes]
-    imgBackground[44:44+633, 808:808+414] = imgModeList[0]
+    imgBackground[44:44+633, 808:808+414] = imgModeList[modeType]
 
     # Now we loop through all the encodings and compare with previously stored ones
     # we use zip() to loop two lists together. otherwise we need two loops for each list
@@ -75,6 +93,20 @@ while True:
             # (55+ x1, 162+y1) = (initial position of actual image in background image in x-axis+ offset position of face in actual image in x-axis, ...)
             # our actual image doesn't start in (0,0) position of imgBackground. Instead, it is (55, 162)
             imgBackground = cvzone.cornerRect(imgBackground, bbox, rt=0)  # rt= rectangle thickness, bbox= bounding box
+
+            id = employeeIds[matchIndex]     # id of face-matched employee
+
+            # if known face detected and counter is not set to 1, we set it to 1
+            if counter == 0:
+                counter = 1
+
+    if counter != 0:
+        if counter == 1:
+            # this is the part where we download the matched employee id
+            studentInfo = db.reference(f'Employees/{id}').get()
+            print(studentInfo)
+
+        counter += 1
 
 
     # cv2.imshow("Webcam", img)
