@@ -84,8 +84,8 @@ while True:
         # print("Match Index", matchIndex)
 
         if matches[matchIndex]:     # if true:
-            print("Known Face Detected")
-            print("Employees Id: ", employeeIds[matchIndex])
+            # print("Known Face Detected")
+            # print("Employees Id: ", employeeIds[matchIndex])
             # we now draw rectangle around the detected face to be fancy 😂😂
             y1, x2, y2, x1 = faceLocations       # this is how face location is mapped. weirdly..
             y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4      # we reduced the size of image by one-fourth for live-encoding so...
@@ -99,6 +99,7 @@ while True:
             # if known face detected and counter is not set to 1, we set it to 1
             if counter == 0:
                 counter = 1
+                modeType = 1
 
     if counter != 0:
         if counter == 1:
@@ -106,6 +107,13 @@ while True:
             studentInfo = db.reference(f'Employees/{id}').get()
             print(studentInfo)
 
+        cv2.putText(imgBackground,str(studentInfo['total_attendance']), (861,125), cv2.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 1)
+        cv2.putText(imgBackground, str(studentInfo['name']), (808, 445), cv2.FONT_HERSHEY_COMPLEX, 1,(50, 50, 50), 1)
+        cv2.putText(imgBackground, str(studentInfo['position']), (1006, 550), cv2.FONT_HERSHEY_COMPLEX, 0.5,(255, 255, 255), 1)
+        cv2.putText(imgBackground, str(id), (1006, 493), cv2.FONT_HERSHEY_COMPLEX, 0.5,(100, 100, 100), 1)
+        cv2.putText(imgBackground, str(studentInfo['rank']), (910, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
+        cv2.putText(imgBackground, str(studentInfo['year']), (1025, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+        cv2.putText(imgBackground, str(studentInfo['starting_year']), (1125, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
         counter += 1
 
 

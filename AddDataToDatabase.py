@@ -19,6 +19,7 @@ data = {
             "position" : "Secretary",
             "starting_year" : 2080,
             "total_attendance" : 10,
+            "rank" : "A",
             "year": 1,
             "last_attendance_time" : "2023-05-27 10:54:34"
         },
@@ -28,6 +29,7 @@ data = {
             "position": "Section Officer",
             "starting_year": 2080,
             "total_attendance": 1,
+            "rank" : "C",
             "year": 1,
             "last_attendance_time": "2023-05-28 12:49:30"
         },
@@ -36,6 +38,7 @@ data = {
             "name": "Yogesh Bhandari",
             "position": "Office Assistant",
             "starting_year": 2080,
+            "rank" : "B",
             "total_attendance": 4,
             "year": 1,
             "last_attendance_time": "2023-05-28 13:34:01"
