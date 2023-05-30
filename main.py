@@ -68,7 +68,7 @@ while True:
 
 
     imgBackground[162:162+480, 55:55+640] = img    # [height, width] or [y-axes, x-axes]
-    imgBackground[44:44+633, 808:808+414] = imgModeList[modeType]
+    imgBackground[44:44+633, 808:808+414] = imgModeList[modeType]      # imgMode is active mode here
 
     # Now we loop through all the encodings and compare with previously stored ones
     # we use zip() to loop two lists together. otherwise we need two loops for each list
@@ -111,26 +111,53 @@ while True:
             print(EmployeeInfo)
 
             # get image from storage
-            blob = bucket.get_blob(f'Images/{id}'.png)
-            array = np.frombuffer(blob.download_as_string(), np.unint8)
+            blob = bucket.get_blob(f'Images/{id}.png')
+            array = np.frombuffer(blob.download_as_string(), np.uint8)
             imgEmployee = cv2.imdecode(array, cv2.COLOR_BGRA2BGR)
 
-        cv2.putText(imgBackground,str(EmployeeInfo['total_attendance']), (861,125), cv2.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 1)
-        cv2.putText(imgBackground, str(EmployeeInfo['position']), (1006, 550), cv2.FONT_HERSHEY_COMPLEX, 0.5,(255, 255, 255), 1)
-        cv2.putText(imgBackground, str(id), (1006, 493), cv2.FONT_HERSHEY_COMPLEX, 0.5,(100, 100, 100), 1)
-        cv2.putText(imgBackground, str(EmployeeInfo['rank']), (910, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
-        cv2.putText(imgBackground, str(EmployeeInfo['year']), (1025, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
-        cv2.putText(imgBackground, str(EmployeeInfo['starting_year']), (1125, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+            # update data of attendance
+            ref = db.reference(f'Employees/{id}')
+            EmployeeInfo['total_attendance'] += 1
+            # now to update into database
+            ref.child('total_attendance').set(EmployeeInfo['total_attendance'])
 
-        # to center position the data "name"
-        # if total width for name placeholder is "TOTAL" and width of my name is "width",
-        # then to center my "name", the formula for starting position is: (TOTAL - width)/2
-        (w, h), _ = cv2.getTextSize(EmployeeInfo['name'], cv2.FONT_HERSHEY_COMPLEX, 1, 1)
-        offset = (414 - w)//2             # total width of Mode 2 image is 414 and // is floor division
-        # using normal division gives typecasting errors
-        cv2.putText(imgBackground, str(EmployeeInfo['name']), (808+offset, 445), cv2.FONT_HERSHEY_COMPLEX, 1,(50, 50, 50), 1)
+        # if counter <10 (i.e. after detected, until 10 frames) it is in info diaply mode
+        # if counter is in between (10,20), it is in marked mode
+        # i.e. after 10 frames until 20 frames, the mode is marked mode
+        if 10<counter<20:
+            modeType = 2
+
+        imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[modeType]    # until counter reaches 10, modeType=1. so info is displayed for 10 frames
+
+        if counter <= 10:
+            cv2.putText(imgBackground,str(EmployeeInfo['total_attendance']), (861,125), cv2.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 1)
+            cv2.putText(imgBackground, str(EmployeeInfo['position']), (1006, 550), cv2.FONT_HERSHEY_COMPLEX, 0.5,(255, 255, 255), 1)
+            cv2.putText(imgBackground, str(id), (1006, 493), cv2.FONT_HERSHEY_COMPLEX, 0.5,(100, 100, 100), 1)
+            cv2.putText(imgBackground, str(EmployeeInfo['rank']), (910, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
+            cv2.putText(imgBackground, str(EmployeeInfo['year']), (1025, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+            cv2.putText(imgBackground, str(EmployeeInfo['starting_year']), (1125, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+
+            # to center position the data "name"
+            # if total width for name placeholder is "TOTAL" and width of my name is "width",
+            # then to center my "name", the formula for starting position is: (TOTAL - width)/2
+            (w, h), _ = cv2.getTextSize(EmployeeInfo['name'], cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+            offset = (414 - w)//2             # total width of Mode 2 image is 414 and // is floor division
+            # using normal division gives typecasting errors
+            cv2.putText(imgBackground, str(EmployeeInfo['name']), (808+offset, 445), cv2.FONT_HERSHEY_COMPLEX, 1,(50, 50, 50), 1)
+
+            imgBackground[175:175+216, 909:909+216] = imgEmployee    # 216*216 is the size of image
+            # image is downloaded once but shown repeatedly
 
         counter += 1
+
+        # if counter is greater than 20 frames, we reset all the info about the employee for the next employee attendance
+        if counter >= 20:
+            counter = 0
+            modeType = 0
+            EmployeeInfo = []
+            imgEmployee = []
+            imgBackground[44:44 + 633, 808:808 + 414] = imgModeList[modeType]   # we had reset the mode to active mode
+
 
 
     # cv2.imshow("Webcam", img)
