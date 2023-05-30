@@ -8,15 +8,17 @@ import face_recognition
 # for real-time database update
 import firebase_admin
 from firebase_admin import credentials
-# from firebase_admin import storage
+from firebase_admin import storage
 from firebase_admin import db
 
 cred = credentials.Certificate("serviceAccountKey.json")
 # Realtime Database URL is placed in JSON format
 firebase_admin.initialize_app(cred, {
     'databaseURL' : "https://faceattendancerealtime-179d4-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    # 'storageBucket' : "faceattendancerealtime-179d4.appspot.com"
+    'storageBucket' : "faceattendancerealtime-179d4.appspot.com"
 })
+
+bucket = storage.bucket()
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
@@ -48,6 +50,7 @@ print("Encoded files loaded successfully.")
 modeType = 0  # mode: active, info, marked, already marked
 counter = 0  # to count no of matched image frames
 id = -1  # for storing matched employee id
+imgEmployee = []
 
 
 while True:
@@ -104,16 +107,29 @@ while True:
     if counter != 0:
         if counter == 1:
             # this is the part where we download the matched employee id
-            studentInfo = db.reference(f'Employees/{id}').get()
-            print(studentInfo)
+            EmployeeInfo = db.reference(f'Employees/{id}').get()
+            print(EmployeeInfo)
 
-        cv2.putText(imgBackground,str(studentInfo['total_attendance']), (861,125), cv2.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 1)
-        cv2.putText(imgBackground, str(studentInfo['name']), (808, 445), cv2.FONT_HERSHEY_COMPLEX, 1,(50, 50, 50), 1)
-        cv2.putText(imgBackground, str(studentInfo['position']), (1006, 550), cv2.FONT_HERSHEY_COMPLEX, 0.5,(255, 255, 255), 1)
+            # get image from storage
+            blob = bucket.get_blob(f'Images/{id}'.png)
+            array = np.frombuffer(blob.download_as_string(), np.unint8)
+            imgEmployee = cv2.imdecode(array, cv2.COLOR_BGRA2BGR)
+
+        cv2.putText(imgBackground,str(EmployeeInfo['total_attendance']), (861,125), cv2.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 1)
+        cv2.putText(imgBackground, str(EmployeeInfo['position']), (1006, 550), cv2.FONT_HERSHEY_COMPLEX, 0.5,(255, 255, 255), 1)
         cv2.putText(imgBackground, str(id), (1006, 493), cv2.FONT_HERSHEY_COMPLEX, 0.5,(100, 100, 100), 1)
-        cv2.putText(imgBackground, str(studentInfo['rank']), (910, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
-        cv2.putText(imgBackground, str(studentInfo['year']), (1025, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
-        cv2.putText(imgBackground, str(studentInfo['starting_year']), (1125, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+        cv2.putText(imgBackground, str(EmployeeInfo['rank']), (910, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6, (100, 100, 100), 1)
+        cv2.putText(imgBackground, str(EmployeeInfo['year']), (1025, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+        cv2.putText(imgBackground, str(EmployeeInfo['starting_year']), (1125, 625), cv2.FONT_HERSHEY_COMPLEX, 0.6,(100, 100, 100), 1)
+
+        # to center position the data "name"
+        # if total width for name placeholder is "TOTAL" and width of my name is "width",
+        # then to center my "name", the formula for starting position is: (TOTAL - width)/2
+        (w, h), _ = cv2.getTextSize(EmployeeInfo['name'], cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+        offset = (414 - w)//2             # total width of Mode 2 image is 414 and // is floor division
+        # using normal division gives typecasting errors
+        cv2.putText(imgBackground, str(EmployeeInfo['name']), (808+offset, 445), cv2.FONT_HERSHEY_COMPLEX, 1,(50, 50, 50), 1)
+
         counter += 1
 
 
